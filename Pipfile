@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+sqlalchemy = ">=2.0"
+passlib = {extras = ["bcrypt"], version = "*"}
+python-jose = "*"
+alembic = "*"
+pytest = "*"
+pydantic-settings = "*"
+sqlmodel = "*"
+uvicorn = "*"
+pydantic = {extras = ["email"], version = "*"}
+
+[dev-packages]
+sqlmodel = "*"
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.13"

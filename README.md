@@ -1,73 +1,147 @@
-# Welcome to your Lovable project
+# TradeJournal 2090 🚀
 
-## Project info
+A futuristic trading journal web application with cutting-edge UI and comprehensive trade management features.
 
-**URL**: https://lovable.dev/projects/fed40da5-8b41-4565-9cd7-e32cfc2f7597
+## 🌟 Features
 
-## How can I edit this code?
+- **Futuristic UI**: Dark theme with neon accents, glassmorphism effects, and smooth animations
+- **Trade Management**: Create, update, delete, and track trading positions
+- **Advanced Analytics**: Win rate, R:R ratios, equity curves, and performance metrics
+- **Real-time Dashboard**: Live stats and recent trading activity
+- **Responsive Design**: Perfect on desktop and mobile devices
+- **JWT Authentication**: Secure login and user management
 
-There are several ways of editing your application.
+## 🛠 Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI Framework**: TailwindCSS + shadcn/ui
+- **Animations**: Framer Motion
+- **State Management**: React Query (TanStack Query)
+- **Charts**: Recharts
+- **API Client**: Axios
+- **Icons**: Lucide React
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fed40da5-8b41-4565-9cd7-e32cfc2f7597) and start prompting.
+## 🚀 Quick Start
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd <YOUR_PROJECT_NAME>
+   ```
 
-**Use your preferred IDE**
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Update VITE_API_URL to point to your FastAPI backend
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+4. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-Follow these steps:
+5. **Open your browser**
+   Navigate to `http://localhost:8080`
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🔧 Backend Integration
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+This frontend is designed to work with a FastAPI backend. Make sure your backend has the following endpoints:
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Authentication
+- `POST /api/v1/auth/signup` - User registration
+- `POST /api/v1/auth/login` - User login
+- `GET /api/v1/auth/me` - Get user profile
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Trades
+- `GET /api/v1/trades/` - List trades (with filtering)
+- `POST /api/v1/trades/` - Create new trade
+- `GET /api/v1/trades/{id}` - Get specific trade
+- `PUT /api/v1/trades/{id}` - Update trade
+- `DELETE /api/v1/trades/{id}` - Delete trade
+- `PATCH /api/v1/trades/{id}/close` - Close trade
+
+### Statistics
+- `GET /api/v1/stats/summary` - Get trading statistics
+- `GET /api/v1/stats/equity_curve` - Get account equity data
+
+## 📱 Pages
+
+- **Login/Signup**: Authentication with beautiful forms
+- **Dashboard**: Overview of trading performance and recent activity
+- **Trades**: Complete trade management with filtering and search
+- **Statistics**: Advanced analytics with interactive charts
+- **Profile**: User settings and account management
+
+## 🎨 Design System
+
+The app uses a comprehensive design system with:
+- **Colors**: Electric cyan, purple, and blue with neon effects
+- **Typography**: Inter font with gradient text effects
+- **Components**: Glass morphism cards and animated buttons
+- **Animations**: Smooth transitions with Framer Motion
+- **Responsive**: Mobile-first design approach
+
+## 🏗 Project Structure
+
+```
+src/
+├── components/
+│   ├── ui/           # shadcn/ui components
+│   └── Layout.tsx    # Main app layout
+├── pages/
+│   ├── auth/         # Authentication pages
+│   ├── Dashboard.tsx
+│   ├── Trades.tsx
+│   ├── Stats.tsx
+│   └── Profile.tsx
+├── lib/
+│   ├── api.ts        # API client and types
+│   └── utils.ts      # Utility functions
+├── hooks/
+│   └── useAuth.ts    # Authentication hook
+└── styles/
+    └── index.css     # Global styles and design tokens
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Build the project**
+   ```bash
+   npm run build
+   ```
 
-**Use GitHub Codespaces**
+2. **Deploy** using your preferred platform:
+   - Vercel: `npx vercel --prod`
+   - Netlify: Drag `dist` folder to Netlify
+   - Custom server: Serve the `dist` folder
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🤝 Contributing
 
-## What technologies are used for this project?
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-This project is built with:
+## 📄 License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## How can I deploy this project?
+## ✨ Features Coming Soon
 
-Simply open [Lovable](https://lovable.dev/projects/fed40da5-8b41-4565-9cd7-e32cfc2f7597) and click on Share -> Publish.
+- [ ] Trade screenshots and image uploads
+- [ ] Advanced filtering and search
+- [ ] Export data to CSV/PDF
+- [ ] Mobile push notifications
+- [ ] Dark/Light theme toggle
+- [ ] Multi-language support
+- [ ] Trading journal notes with rich text
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Built with ❤️ for the future of trading • 2090 Edition

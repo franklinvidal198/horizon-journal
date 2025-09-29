@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Outlet, useLocation, NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -38,9 +40,11 @@ const navigationItems = [
   },
 ];
 
-export default function Layout() {
+function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background grid-pattern">
@@ -113,6 +117,7 @@ export default function Layout() {
                 variant="ghost"
                 size="sm"
                 className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
+                onClick={() => { logout(); navigate('/login'); }}
               >
                 <LogOut className="h-4 w-4" />
                 {sidebarOpen && <span className="ml-3">Sign Out</span>}
@@ -177,3 +182,4 @@ export default function Layout() {
     </div>
   );
 }
+  export default Layout;

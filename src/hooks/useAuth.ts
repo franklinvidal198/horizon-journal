@@ -13,15 +13,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export const useAuthState = () => {
+import React from 'react';
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,25 +52,26 @@ export const useAuthState = () => {
     }
   };
 
-  const signup = async (name: string, email: string, password: string) => {
-    try {
-      const response = await authAPI.signup(name, email, password);
-      localStorage.setItem('token', response.access_token);
-      const user = await authAPI.getProfile();
-      setUser(user);
-      toast({
-        title: "Account created!",
-        description: "Welcome to TradeJournal 2090.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Signup failed",
-        description: error.response?.data?.detail || "Failed to create account",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
+  // ...existing code...
+    const signup = async (name: string, email: string, password: string) => {
+      try {
+        const response = await authAPI.signup(name, email, password);
+        localStorage.setItem('token', response.access_token);
+        const user = await authAPI.getProfile();
+        setUser(user);
+        toast({
+          title: "Account created!",
+          description: "Welcome to TradeJournal 2090.",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Signup failed",
+          description: error.response?.data?.detail || "Failed to create account",
+          variant: "destructive",
+        });
+        throw error;
+      }
+    };
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -88,12 +82,26 @@ export const useAuthState = () => {
     });
   };
 
-  return {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    login,
-    signup,
-    logout,
-  };
+  return React.createElement(
+    AuthContext.Provider,
+    {
+      value: {
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        login,
+        signup,
+        logout,
+      }
+    },
+    children
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

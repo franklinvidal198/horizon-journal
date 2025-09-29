@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, TrendingUp, User, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
-export default function Signup() {
+function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -15,11 +17,26 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { signup } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement signup logic
-    console.log("Signup:", formData);
+    if (formData.password !== formData.confirmPassword) {
+      // You can use toast here for feedback
+      alert("Passwords do not match");
+      return;
+    }
+    setLoading(true);
+    try {
+  await signup(formData.name, formData.email, formData.password);
+      navigate("/dashboard");
+    } catch (error) {
+      // Error handled by toast in useAuth
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,8 +160,9 @@ export default function Signup() {
                 type="submit"
                 className="w-full bg-gradient-secondary hover:glow-secondary transition-smooth"
                 size="lg"
+                disabled={loading}
               >
-                Create Account
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
@@ -165,3 +183,4 @@ export default function Signup() {
     </div>
   );
 }
+export default Signup;

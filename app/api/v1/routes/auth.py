@@ -1,4 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
+from app.models.user import User as UserModel
+from app.schemas.user import UserRead
+from app.core.config import settings
 from sqlmodel import Session
 from app.db.session import get_session
 from app.schemas.user import UserCreate, UserLogin
@@ -7,6 +12,28 @@ from app.crud.user import get_user_by_email, create_user
 from app.utils.security import verify_password, create_access_token
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = get_user_by_email(session, email)
+    if user is None:
+        raise credentials_exception
+    return user
+
+@router.get("/me", response_model=UserRead)
+async def read_users_me(current_user: UserModel = Depends(get_current_user)):
+    return current_user
 
 @router.post("/signup", response_model=Token)
 async def signup(user_in: UserCreate, session: Session = Depends(get_session)):

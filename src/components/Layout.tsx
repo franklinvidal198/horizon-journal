@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Outlet, useLocation, NavLink } from "react-router-dom";
@@ -40,11 +40,31 @@ const navigationItems = [
   },
 ];
 
-function Layout() {
+const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mode, setMode] = useState('real');
+  const [modeLoading, setModeLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  useEffect(() => {
+    fetch('/api/v1/system/mode')
+      .then(res => res.json())
+      .then(data => setMode(data.mode));
+  }, []);
+
+  const handleModeChange = async (newMode: string) => {
+    setModeLoading(true);
+    await fetch('/api/v1/system/mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: newMode })
+    });
+    setMode(newMode);
+    setModeLoading(false);
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-background grid-pattern">
@@ -111,12 +131,30 @@ function Layout() {
               </ul>
             </nav>
 
-            {/* User section */}
+            {/* Data Mode Toggle Section */}
             <div className="px-4 py-4 border-t border-sidebar-border">
+              <div className="mb-2">
+                <span className="text-xs text-muted-foreground">Data Mode:</span>
+                <div className="mt-1 flex flex-col gap-1">
+                  {['test', 'real', 'seed'].map(m => (
+                    <Button
+                      key={m}
+                      variant={mode === m ? 'default' : 'ghost'}
+                      size="sm"
+                      className="w-full text-left"
+                      disabled={modeLoading}
+                      onClick={() => handleModeChange(m)}
+                    >
+                      {m.charAt(0).toUpperCase() + m.slice(1)}
+                      {mode === m && ' (Active)'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
+                className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent mt-2"
                 onClick={() => { logout(); navigate('/login'); }}
               >
                 <LogOut className="h-4 w-4" />
@@ -182,4 +220,5 @@ function Layout() {
     </div>
   );
 }
-  export default Layout;
+
+export default Layout;

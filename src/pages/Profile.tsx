@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Camera, Save, Bell, Shield } from "lucide-react";
+import { authAPI, statsAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,12 +11,37 @@ import { Separator } from "@/components/ui/separator";
 
 export default function Profile() {
   const [profileData, setProfileData] = useState({
-    name: "John Trader",
-    email: "john@example.com",
+    name: "",
+    email: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+  const [accountStats, setAccountStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchProfile() {
+      setLoading(true);
+      setError("");
+      try {
+        const user = await authAPI.getProfile();
+        setProfileData(prev => ({
+          ...prev,
+          name: user.name,
+          email: user.email,
+        }));
+        const stats = await statsAPI.getSummary();
+        setAccountStats(stats);
+      } catch (err) {
+        setError("Failed to load profile data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProfile();
+  }, []);
 
   const [notifications, setNotifications] = useState({
     email: true,
@@ -42,6 +68,13 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
+      {/* Loading/Error States */}
+      {loading && (
+        <div className="text-center py-8 text-muted-foreground">Loading profile...</div>
+      )}
+      {error && (
+        <div className="text-center py-8 text-destructive">{error}</div>
+      )}
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Profile Settings</h1>
@@ -241,19 +274,19 @@ export default function Profile() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Member since</span>
-                <span className="font-medium text-foreground">Jan 2024</span>
+                <span className="font-medium text-foreground">{accountStats?.created_at ? new Date(accountStats.created_at).toLocaleDateString() : "-"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total trades</span>
-                <span className="font-medium text-foreground">67</span>
+                <span className="font-medium text-foreground">{accountStats?.total_trades ?? "-"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Success rate</span>
-                <span className="font-medium text-success">73.2%</span>
+                <span className="font-medium text-success">{accountStats?.win_rate ? `${accountStats.win_rate.toFixed(1)}%` : "-"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Account level</span>
-                <span className="font-medium text-primary">Pro Trader</span>
+                <span className="font-medium text-primary">{accountStats?.account_level ?? "-"}</span>
               </div>
             </CardContent>
           </Card>

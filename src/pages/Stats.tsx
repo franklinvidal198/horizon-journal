@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -19,75 +20,46 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Cell,
   BarChart,
   Bar,
 } from "recharts";
+import { statsAPI } from "@/lib/api";
 
-const equityData = [
-  { date: "Jan 01", balance: 10000 },
-  { date: "Jan 02", balance: 10150 },
-  { date: "Jan 03", balance: 10080 },
-  { date: "Jan 04", balance: 10320 },
-  { date: "Jan 05", balance: 10280 },
-  { date: "Jan 06", balance: 10450 },
-  { date: "Jan 07", balance: 10380 },
-  { date: "Jan 08", balance: 10620 },
-  { date: "Jan 09", balance: 10580 },
-  { date: "Jan 10", balance: 10750 },
-  { date: "Jan 11", balance: 10690 },
-  { date: "Jan 12", balance: 10850 },
-];
-
-const pairData = [
-  { name: "EUR/USD", trades: 12, profit: 650, color: "#00D4FF" },
-  { name: "GBP/JPY", trades: 8, profit: 420, color: "#A855F7" },
-  { name: "USD/CAD", trades: 6, profit: 280, color: "#3B82F6" },
-  { name: "AUD/USD", trades: 4, profit: 180, color: "#10B981" },
-];
-
-const monthlyData = [
-  { month: "Oct", profit: 850, trades: 15 },
-  { month: "Nov", profit: 1200, trades: 18 },
-  { month: "Dec", profit: 950, trades: 12 },
-  { month: "Jan", profit: 1450, trades: 22 },
-];
-
-const stats = [
-  {
-    title: "Total Profit",
-    value: "$4,650.00",
-    change: "+8.2%",
-    icon: DollarSign,
-    color: "success",
-  },
-  {
-    title: "Win Rate",
-    value: "73.2%",
-    change: "+2.1%",
-    icon: Target,
-    color: "primary",
-  },
-  {
-    title: "Avg R:R Ratio",
-    value: "2.34",
-    change: "+0.15",
-    icon: TrendingUp,
-    color: "accent",
-  },
-  {
-    title: "Total Trades",
-    value: "67",
-    change: "+12",
-    icon: Activity,
-    color: "secondary",
-  },
-];
+// Remove hardcoded demo data. Fetch stats and equity curve from backend.
 
 export default function Stats() {
+  const [stats, setStats] = useState(null);
+  const [equityData, setEquityData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchStatsData() {
+      setLoading(true);
+      setError("");
+      try {
+        const statsData = await statsAPI.getSummary();
+        setStats(statsData);
+        const equityCurve = await statsAPI.getEquityCurve();
+        setEquityData(equityCurve);
+      } catch (err) {
+        setError("Failed to load stats data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStatsData();
+  }, []);
+
   return (
     <div className="space-y-6">
+      {/* Loading/Error States */}
+      {loading && (
+        <div className="text-center py-8 text-muted-foreground">Loading statistics...</div>
+      )}
+      {error && (
+        <div className="text-center py-8 text-destructive">{error}</div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -107,31 +79,78 @@ export default function Stats() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <Card className="glass border-border/50 hover:glow-primary transition-smooth">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`h-8 w-8 bg-gradient-${stat.color} rounded-lg flex items-center justify-center glow-${stat.color}`}>
-                  <stat.icon className="h-4 w-4 text-background" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                <p className="text-xs text-success">
-                  {stat.change} from last month
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+        {stats && (
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0 }}
+            >
+              <Card className="glass border-border/50 hover:glow-primary transition-smooth">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Profit</CardTitle>
+                  <div className="h-8 w-8 bg-gradient-success rounded-lg flex items-center justify-center glow-success">
+                    <DollarSign className="h-4 w-4 text-background" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">${stats.total_profit?.toFixed(2) ?? "-"}</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <Card className="glass border-border/50 hover:glow-primary transition-smooth">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Win Rate</CardTitle>
+                  <div className="h-8 w-8 bg-gradient-primary rounded-lg flex items-center justify-center glow-primary">
+                    <Target className="h-4 w-4 text-background" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">{stats.win_rate ? `${stats.win_rate.toFixed(1)}%` : "-"}</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <Card className="glass border-border/50 hover:glow-primary transition-smooth">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Avg R:R Ratio</CardTitle>
+                  <div className="h-8 w-8 bg-gradient-accent rounded-lg flex items-center justify-center glow-accent">
+                    <TrendingUp className="h-4 w-4 text-background" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">{stats.avg_risk_reward?.toFixed(2) ?? "-"}</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
+              <Card className="glass border-border/50 hover:glow-primary transition-smooth">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Trades</CardTitle>
+                  <div className="h-8 w-8 bg-gradient-secondary rounded-lg flex items-center justify-center glow-secondary">
+                    <Activity className="h-4 w-4 text-background" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">{stats.total_trades ?? "-"}</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </>
+        )}
       </div>
 
       {/* Charts Grid */}
@@ -186,43 +205,8 @@ export default function Stats() {
           </Card>
         </motion.div>
 
-        {/* Trading Pairs Performance */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.5 }}
-        >
-          <Card className="glass border-border/50">
-            <CardHeader>
-              <CardTitle className="flex items-center text-foreground">
-                <PieChart className="h-5 w-5 mr-2 text-secondary" />
-                Pair Performance
-              </CardTitle>
-              <CardDescription>Profit by trading pairs</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {pairData.map((pair, index) => (
-                  <div key={pair.name} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: pair.color }}
-                      />
-                      <div>
-                        <div className="font-medium text-foreground">{pair.name}</div>
-                        <div className="text-sm text-muted-foreground">{pair.trades} trades</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium text-success">+${pair.profit}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+  {/* Trading Pairs Performance */}
+  {/* This section requires backend support for pair performance. If available, fetch and display. Otherwise, leave as placeholder or remove. */}
       </div>
 
       {/* Monthly Performance */}
@@ -242,7 +226,7 @@ export default function Stats() {
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
+                <BarChart data={[]}> {/* No monthly data from backend yet */}
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
                     dataKey="month" 
@@ -272,7 +256,7 @@ export default function Stats() {
         </Card>
       </motion.div>
 
-      {/* Additional Stats */}
+      {/* Additional Stats (expecting backend data) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="glass border-border/50">
           <CardHeader>
@@ -283,9 +267,9 @@ export default function Stats() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-success">+$345.50</div>
-              <div className="text-sm text-muted-foreground">EUR/USD • BUY</div>
-              <div className="text-xs text-muted-foreground">Jan 08, 2024</div>
+              <div className="text-2xl font-bold text-success">{/* TODO: best trade value from backend */}-</div>
+              <div className="text-sm text-muted-foreground">{/* TODO: best trade pair/direction from backend */}-</div>
+              <div className="text-xs text-muted-foreground">{/* TODO: best trade date from backend */}-</div>
             </div>
           </CardContent>
         </Card>
@@ -299,9 +283,9 @@ export default function Stats() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-foreground">4.2h</div>
+              <div className="text-2xl font-bold text-foreground">{/* TODO: avg hold time from backend */}-</div>
               <div className="text-sm text-muted-foreground">Average position</div>
-              <div className="text-xs text-success">-0.3h from last month</div>
+              <div className="text-xs text-success">{/* TODO: hold time change from backend */}-</div>
             </div>
           </CardContent>
         </Card>
@@ -315,9 +299,9 @@ export default function Stats() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-foreground">7.2/10</div>
-              <div className="text-sm text-muted-foreground">Moderate risk</div>
-              <div className="text-xs text-accent">Optimal range</div>
+              <div className="text-2xl font-bold text-foreground">{/* TODO: risk score from backend */}-</div>
+              <div className="text-sm text-muted-foreground">{/* TODO: risk description from backend */}-</div>
+              <div className="text-xs text-accent">{/* TODO: risk range from backend */}-</div>
             </div>
           </CardContent>
         </Card>

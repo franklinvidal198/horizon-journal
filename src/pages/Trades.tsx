@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -9,8 +9,9 @@ import {
   TrendingDown,
   Eye,
   Edit,
-  Trash2,
+  Trash2
 } from "lucide-react";
+import { tradesAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,60 +25,28 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-const trades = [
-  {
-    id: 1,
-    pair: "EUR/USD",
-    direction: "BUY",
-    entryPrice: 1.0850,
-    exitPrice: 1.0920,
-    stopLoss: 1.0800,
-    takeProfit: 1.0950,
-    positionSize: 10000,
-    result: "+145.50",
-    resultPips: "+70",
-    riskReward: "2.4",
-    status: "CLOSED",
-    openedAt: "2024-01-15 09:30",
-    closedAt: "2024-01-15 14:20",
-  },
-  {
-    id: 2,
-    pair: "GBP/JPY",
-    direction: "SELL",
-    entryPrice: 185.40,
-    exitPrice: 184.90,
-    stopLoss: 186.00,
-    takeProfit: 184.00,
-    positionSize: 5000,
-    result: "-67.20",
-    resultPips: "-50",
-    riskReward: "1.5",
-    status: "CLOSED",
-    openedAt: "2024-01-15 11:15",
-    closedAt: "2024-01-15 12:45",
-  },
-  {
-    id: 3,
-    pair: "USD/CAD",
-    direction: "BUY",
-    entryPrice: 1.3450,
-    exitPrice: null,
-    stopLoss: 1.3400,
-    takeProfit: 1.3550,
-    positionSize: 8000,
-    result: "+0.00",
-    resultPips: "+0",
-    riskReward: "2.0",
-    status: "OPEN",
-    openedAt: "2024-01-16 08:00",
-    closedAt: null,
-  },
-];
-
 export default function Trades() {
+  const [trades, setTrades] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
+
+  useEffect(() => {
+    async function fetchTrades() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await tradesAPI.getTrades();
+        setTrades(data);
+      } catch (err) {
+        setError("Failed to load trades.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTrades();
+  }, []);
 
   const filteredTrades = trades.filter((trade) => {
     const matchesSearch = trade.pair.toLowerCase().includes(searchTerm.toLowerCase());
@@ -87,6 +56,13 @@ export default function Trades() {
 
   return (
     <div className="space-y-6">
+      {/* Loading/Error States */}
+      {loading && (
+        <div className="text-center py-8 text-muted-foreground">Loading trades...</div>
+      )}
+      {error && (
+        <div className="text-center py-8 text-destructive">{error}</div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -151,114 +127,134 @@ export default function Trades() {
       </Card>
 
       {/* Trades Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      >
-        <Card className="glass border-border/50">
-          <CardHeader>
-            <CardTitle className="text-foreground">Trading History</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border/50">
-                    <TableHead className="text-foreground">Pair</TableHead>
-                    <TableHead className="text-foreground">Direction</TableHead>
-                    <TableHead className="text-foreground">Entry</TableHead>
-                    <TableHead className="text-foreground">Exit</TableHead>
-                    <TableHead className="text-foreground">Size</TableHead>
-                    <TableHead className="text-foreground">Result</TableHead>
-                    <TableHead className="text-foreground">R:R</TableHead>
-                    <TableHead className="text-foreground">Status</TableHead>
-                    <TableHead className="text-foreground">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTrades.map((trade) => (
-                    <TableRow key={trade.id} className="border-border/30 hover:bg-muted/10">
-                      <TableCell>
-                        <div className="font-medium text-foreground">{trade.pair}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(trade.openedAt).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {trade.direction === "BUY" ? (
-                            <TrendingUp className="h-4 w-4 text-success" />
-                          ) : (
-                            <TrendingDown className="h-4 w-4 text-destructive" />
-                          )}
-                          <span className={`text-sm font-medium ${
-                            trade.direction === "BUY" ? "text-success" : "text-destructive"
-                          }`}>
-                            {trade.direction}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground">{trade.entryPrice}</TableCell>
-                      <TableCell className="text-foreground">
-                        {trade.exitPrice || "-"}
-                      </TableCell>
-                      <TableCell className="text-foreground">
-                        {trade.positionSize.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className={`font-medium ${
-                            parseFloat(trade.result) > 0 
-                              ? "text-success" 
-                              : parseFloat(trade.result) < 0 
-                              ? "text-destructive" 
-                              : "text-muted-foreground"
-                          }`}>
-                            {trade.result}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {trade.resultPips} pips
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground">{trade.riskReward}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={trade.status === "OPEN" ? "default" : "secondary"}
-                          className={trade.status === "OPEN" 
-                            ? "bg-accent/20 text-accent border-accent/30" 
-                            : "bg-muted/20 text-muted-foreground border-muted/30"
-                          }
-                        >
-                          {trade.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-1">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+      {!loading && !error && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <Card className="glass border-border/50">
+            <CardHeader>
+              <CardTitle className="text-foreground">Trading History</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border/50">
+                      <TableHead className="text-foreground">Pair</TableHead>
+                      <TableHead className="text-foreground">Direction</TableHead>
+                      <TableHead className="text-foreground">Entry</TableHead>
+                      <TableHead className="text-foreground">Exit</TableHead>
+                      <TableHead className="text-foreground">Size</TableHead>
+                      <TableHead className="text-foreground">Result</TableHead>
+                      <TableHead className="text-foreground">R:R</TableHead>
+                      <TableHead className="text-foreground">Status</TableHead>
+                      <TableHead className="text-foreground">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTrades.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                          No trades found.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredTrades.map((trade) => (
+                        <TableRow key={trade.id} className="border-border/30 hover:bg-muted/10">
+                          <TableCell>
+                            <div className="font-medium text-foreground">{trade.pair}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(trade.opened_at).toLocaleDateString()}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              {trade.direction === "BUY" ? (
+                                <TrendingUp className="h-4 w-4 text-success" />
+                              ) : (
+                                <TrendingDown className="h-4 w-4 text-destructive" />
+                              )}
+                              <span className={`text-sm font-medium ${
+                                trade.direction === "BUY" ? "text-success" : "text-destructive"
+                              }`}>
+                                {trade.direction}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-foreground">{trade.entry_price}</TableCell>
+                          <TableCell className="text-foreground">
+                            {trade.exit_price ?? "-"}
+                          </TableCell>
+                          <TableCell className="text-foreground">
+                            {trade.position_size?.toLocaleString?.() ?? "-"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className={`font-medium ${
+                                trade.result_usd && trade.result_usd > 0
+                                  ? "text-success"
+                                  : trade.result_usd && trade.result_usd < 0
+                                  ? "text-destructive"
+                                  : "text-muted-foreground"
+                              }`}>
+                                {typeof trade.result_usd === "number"
+                                  ? trade.result_usd.toFixed(2)
+                                  : "-"}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {typeof trade.result_pips === "number"
+                                  ? `${trade.result_pips} pips`
+                                  : "-"}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-foreground">
+                            {typeof trade.risk_reward === "number"
+                              ? trade.risk_reward.toFixed(2)
+                              : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={trade.status === "OPEN" ? "default" : "secondary"}
+                              className={trade.status === "OPEN" 
+                                ? "bg-accent/20 text-accent border-accent/30" 
+                                : "bg-muted/20 text-muted-foreground border-muted/30"
+                              }
+                            >
+                              {trade.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-1">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 }
+
+// End of file

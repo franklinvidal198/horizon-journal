@@ -1,0 +1,15 @@
+fastapi
+sqlmodel
+sqlalchemy>=2.0
+pydantic
+passlib[bcrypt]
+python-jose
+alembic
+pytest
+pydantic-settings
+email-validator
+bcrypt>=4.0.1
+passlib>=1.7.4
+httpx
+bcrypt>=4.0.1
+passlib>=1.7.4

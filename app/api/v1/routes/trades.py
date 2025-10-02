@@ -32,7 +32,7 @@ def mock_trade():
         result_pips=10,
         result_usd=100.0,
         notes="Test trade",
-        screenshot_url=None
+        screenshot=None
     )
 
 def get_data_mode():
@@ -52,14 +52,16 @@ async def create_trade_endpoint(trade_in: TradeCreate, session: Session = Depend
 async def list_trades(
     pair: Optional[str] = Query(None),
     status: Optional[TradeStatus] = Query(None),
-    start: Optional[datetime] = Query(None),
-    end: Optional[datetime] = Query(None),
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    limit: Optional[int] = Query(None),
+    offset: Optional[int] = Query(None),
     session: Session = Depends(get_session)
 ):
     mode = get_data_mode()
     if mode == "test":
         return [mock_trade()]
-    trades = get_trades(session, pair, status, start, end)
+    trades = get_trades(session, pair, status, start_date, end_date, limit, offset)
     if mode == "real":
         # Exclude any trade whose pair contains 'TEST' or 'XAU' (case-insensitive, substring or exact match)
         trades = [t for t in trades if all(x not in t.pair.upper() for x in ["TEST", "XAU"]) and t.pair.upper() not in ["TEST/USD", "XAU/USD"]]

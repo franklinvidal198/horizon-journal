@@ -15,16 +15,20 @@ def create_trade(session: Session, trade_in: TradeCreate):
 def get_trade(session: Session, trade_id: int):
     return session.get(Trade, trade_id)
 
-def get_trades(session: Session, pair: str = None, status: TradeStatus = None, start: datetime = None, end: datetime = None):
+def get_trades(session: Session, pair: str = None, status: TradeStatus = None, start_date: datetime = None, end_date: datetime = None, limit: int = None, offset: int = None):
     query = select(Trade)
     if pair:
         query = query.where(Trade.pair == pair)
     if status:
         query = query.where(Trade.status == status)
-    if start:
-        query = query.where(Trade.opened_at >= start)
-    if end:
-        query = query.where(Trade.opened_at <= end)
+    if start_date:
+        query = query.where(Trade.opened_at >= start_date)
+    if end_date:
+        query = query.where(Trade.opened_at <= end_date)
+    if limit:
+        query = query.limit(limit)
+    if offset:
+        query = query.offset(offset)
     return session.exec(query).all()
 
 def update_trade(session: Session, trade_id: int, trade_in: TradeUpdate):

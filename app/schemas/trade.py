@@ -11,7 +11,7 @@ class TradeBase(BaseModel):
     take_profit: Optional[float] = Field(None, gt=0)
     position_size: float = Field(..., gt=0)
     notes: Optional[str] = None
-    screenshot_url: Optional[str] = None
+    screenshot: Optional[str] = None
 
 class TradeCreate(TradeBase):
     pass
@@ -23,7 +23,7 @@ class TradeUpdate(BaseModel):
     take_profit: Optional[float] = Field(None, gt=0)
     position_size: Optional[float] = Field(None, gt=0)
     notes: Optional[str] = None
-    screenshot_url: Optional[str] = None
+    screenshot: Optional[str] = None
     status: Optional[TradeStatus] = None
 
 class TradeRead(TradeBase):

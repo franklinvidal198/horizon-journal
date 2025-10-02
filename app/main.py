@@ -2,9 +2,31 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.routes import auth, trades, stats
-from app.core.config import settings
+from app.core.config import settings, DATA_MODE
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import os
+from app.utils.seed import seed_trades
 
 app = FastAPI(title="Trading Journal API", version="1.0.0")
+
+# System mode endpoint
+@app.get("/api/v1/system/mode")
+async def get_mode():
+    return {"mode": DATA_MODE}
+
+@app.post("/api/v1/system/mode")
+async def set_mode(request: Request):
+    body = await request.json()
+    mode = body.get("mode")
+    if mode not in ["test", "real", "seed"]:
+        return JSONResponse(status_code=400, content={"error": "Invalid mode"})
+    os.environ["DATA_MODE"] = mode
+    global DATA_MODE
+    DATA_MODE = mode
+    if mode == "seed":
+        seed_trades()
+    return {"mode": DATA_MODE}
 
 # CORS for frontend
 app.add_middleware(

@@ -10,4 +10,6 @@ class Settings(BaseSettings):
     SQLITE_DB: str = os.getenv("SQLITE_DB", "sqlite:///./trading_journal.db")
     ALEMBIC_INI: str = "alembic.ini"
 
+
+DATA_MODE = os.getenv('DATA_MODE', 'real')  # Options: 'test', 'real', 'seed'
 settings = Settings()

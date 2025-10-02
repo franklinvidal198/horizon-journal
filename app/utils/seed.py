@@ -4,6 +4,7 @@ from app.models.trade import Trade, TradeDirection, TradeStatus
 from datetime import datetime, timedelta
 
 def seed_trades():
+    from app.models.trade import Trade
     demo_trades = [
         Trade(
             pair="XAU/USD",
@@ -33,6 +34,7 @@ def seed_trades():
         ),
     ]
     with Session(engine) as session:
+        session.query(Trade).delete()  # Clear existing trades
         for trade in demo_trades:
             session.add(trade)
         session.commit()

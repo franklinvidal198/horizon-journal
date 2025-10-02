@@ -12,7 +12,7 @@ class TradeStatus(str, enum.Enum):
     CLOSED = "CLOSED"
 
 class Trade(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     pair: str
     direction: TradeDirection
     entry_price: float

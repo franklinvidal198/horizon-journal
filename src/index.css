@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Futuristic Trading Journal Design System - 2090 Theme */
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 240 12% 6%;
+    --foreground: 210 40% 98%;
+
+    /* Card and surfaces with glassmorphism */
+    --card: 240 12% 8%;
+    --card-foreground: 210 40% 98%;
+    --glass: 240 12% 12%;
+
+    /* Popover */
+    --popover: 240 12% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Electric neon primary - Cyan */
+    --primary: 180 100% 50%;
+    --primary-foreground: 240 12% 6%;
+    --primary-glow: 180 100% 70%;
+
+    /* Secondary - Electric Purple */
+    --secondary: 270 85% 60%;
+    --secondary-foreground: 240 12% 6%;
+    --secondary-glow: 270 85% 80%;
+
+    /* Muted elements */
+    --muted: 240 12% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    /* Accent - Electric Blue */
+    --accent: 220 100% 60%;
+    --accent-foreground: 240 12% 6%;
+    --accent-glow: 220 100% 80%;
+
+    /* Success - Electric Green */
+    --success: 150 100% 50%;
+    --success-foreground: 240 12% 6%;
+    --success-glow: 150 100% 70%;
+
+    /* Destructive - Electric Red */
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --destructive-glow: 0 100% 80%;
+
+    /* Borders and inputs */
+    --border: 240 12% 20%;
+    --input: 240 12% 15%;
+    --ring: 180 100% 50%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--primary)));
+    --gradient-bg: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+
+    /* Shadows */
+    --shadow-neon-primary: 0 0 20px hsl(var(--primary) / 0.3);
+    --shadow-neon-secondary: 0 0 20px hsl(var(--secondary) / 0.3);
+    --shadow-neon-accent: 0 0 20px hsl(var(--accent) / 0.3);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    /* Sidebar */
+    --sidebar-background: 240 12% 4%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 180 100% 50%;
+    --sidebar-primary-foreground: 240 12% 6%;
+    --sidebar-accent: 240 12% 10%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 240 12% 15%;
+    --sidebar-ring: 180 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--gradient-bg);
+  }
+
+  /* Glass morphism utility */
+  .glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Neon glow effects */
+  .glow-primary {
+    box-shadow: var(--shadow-neon-primary);
+  }
+
+  .glow-secondary {
+    box-shadow: var(--shadow-neon-secondary);
+  }
+
+  .glow-accent {
+    box-shadow: var(--shadow-neon-accent);
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Animated background grid */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(rgba(180, 100%, 50%, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180, 100%, 50%, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-move 20s linear infinite;
+  }
+
+  @keyframes grid-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-glow));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

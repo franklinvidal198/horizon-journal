@@ -1,3 +1,20 @@
+src/
+├── components/
+│   ├── ui/           # shadcn/ui components
+│   └── Layout.tsx    # Main app layout
+├── pages/
+│   ├── auth/         # Authentication pages
+│   ├── Dashboard.tsx
+│   ├── Trades.tsx
+│   ├── Stats.tsx
+│   └── Profile.tsx
+├── lib/
+│   ├── api.ts        # API client and types
+│   └── utils.ts      # Utility functions
+├── hooks/
+│   └── useAuth.ts    # Authentication hook
+└── styles/
+    └── index.css     # Global styles and design tokens
 # Trading Journal API
 
 A FastAPI backend MVP for recording and analyzing trades.
@@ -45,4 +62,3 @@ pytest
 ## API Docs
 
 Visit `/docs` after starting the server.
-# Trading-Journalv1

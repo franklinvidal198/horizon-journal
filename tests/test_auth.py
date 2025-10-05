@@ -6,7 +6,7 @@ client = TestClient(app)
 
 # ---------- AUTH ENDPOINTS ----------
 def test_signup_success():
-    payload = {"email": "testuser@example.com", "password": "testpass123"}
+    payload = {"name": "Test User", "email": "testuser@example.com", "password": "testpass123"}
     response = client.post("/api/v1/auth/signup", json=payload)
     assert response.status_code == 200
     data = response.json()
@@ -14,16 +14,17 @@ def test_signup_success():
     assert data["token_type"] == "bearer"
 
 def test_signup_duplicate():
-    payload = {"email": "testuser@example.com", "password": "testpass123"}
+    payload = {"name": "Test User", "email": "testuser@example.com", "password": "testpass123"}
     client.post("/api/v1/auth/signup", json=payload)  # First signup
     response = client.post("/api/v1/auth/signup", json=payload)  # Duplicate
     assert response.status_code == 400
     assert response.json()["detail"] == "Email already registered"
 
 def test_login_success():
-    payload = {"email": "testuser2@example.com", "password": "testpass456"}
-    client.post("/api/v1/auth/signup", json=payload)
-    response = client.post("/api/v1/auth/login", json=payload)
+    signup_payload = {"name": "Test User2", "email": "testuser2@example.com", "password": "testpass456"}
+    client.post("/api/v1/auth/signup", json=signup_payload)
+    login_payload = {"email": "testuser2@example.com", "password": "testpass456"}
+    response = client.post("/api/v1/auth/login", json=login_payload)
     assert response.status_code == 200
     data = response.json()
     assert "access_token" in data

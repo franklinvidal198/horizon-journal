@@ -21,4 +21,4 @@ def test_stats_equity_curve():
     assert isinstance(curve, list)
     if curve:
         assert "date" in curve[0]
-        assert "equity" in curve[0]
+        assert "balance" in curve[0]
